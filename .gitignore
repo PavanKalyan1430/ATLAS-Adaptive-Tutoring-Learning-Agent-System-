@@ -1,0 +1,72 @@
+# ==========================================
+#  Python
+# ==========================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+
+# Virtual Environment
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ==========================================
+#  Environment / Secrets
+# ==========================================
+.env
+.env.*
+!.env.example
+
+# ==========================================
+#  FAISS Index & Metadata (auto-generated)
+# ==========================================
+faiss_index.bin
+metadata.pkl
+
+# ==========================================
+#  Temp Uploads (runtime folder)
+# ==========================================
+temp_uploads/
+
+# ==========================================
+#  Logs
+# ==========================================
+*.log
+logs/
+
+# ==========================================
+#  OS / Editor
+# ==========================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ==========================================
+#  Frontend (Node)
+# ==========================================
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+frontend/.vite/
+
+# ==========================================
+#  Testing / Coverage
+# ==========================================
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
