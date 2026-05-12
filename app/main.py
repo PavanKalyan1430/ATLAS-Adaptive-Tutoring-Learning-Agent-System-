@@ -1,19 +1,16 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from app.models.schemas import QueryRequest, QueryResponse, UploadResponse, DocumentMetadata
-from app.services.ingestion import IngestionService
-from app.services.embedding import EmbeddingService
-from app.services.llm import LLMService
-from app.services.retrieval import RetrievalService
-from app.db.faiss_store import FAISSStore
+from app.models.schemas import QueryRequest, QueryResponse, UploadResponse, DocumentStatus
 import os
 import shutil
 import uuid
-from typing import List
+import logging
 
-app = FastAPI(title="PDF RAG System")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("A.R.C.H.E.R")
 
-# Enable CORS for the frontend
+app = FastAPI(title="A.R.C.H.E.R - Document Intelligence Platform")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,83 +19,182 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize services
-faiss_store = FAISSStore()
-embedding_service = EmbeddingService()
-ingestion_service = IngestionService()
-llm_service = LLMService()
-retrieval_service = RetrievalService(faiss_store, embedding_service)
-
 TEMP_DIR = "temp_uploads"
-os.makedirs(TEMP_DIR, exist_ok=True)
 
-@app.post("/upload", response_model=UploadResponse)
-async def upload_pdf(file: UploadFile = File(...)):
-    if not file.filename.endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
-    
-    file_id = str(uuid.uuid4())
-    file_path = os.path.join(TEMP_DIR, f"{file_id}_{file.filename}")
-    
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    
+# ==========================================
+# In-memory document status registry
+# Maps doc_id -> DocumentStatus
+# ==========================================
+_doc_registry: dict[str, DocumentStatus] = {}
+
+# ==========================================
+# Lazy-loaded singletons (initialized on first use)
+# ==========================================
+_services = {}
+
+def _get_services():
+    """Initialize all services lazily on first request, not at server boot."""
+    if not _services:
+        logger.info("🔌 Initializing services for the first time...")
+
+        from app.services.embedding import EmbeddingService
+        from app.services.llm import LLMService
+        from app.db.qdrant import QdrantManager
+        from app.services.retrieval import RetrievalService
+        from app.agents.nodes import AgentNodes
+        from app.agents.workflow import ArcherWorkflow
+
+        logger.info("  → Loading Embedding Model (BGE)...")
+        embedding_svc = EmbeddingService()
+
+        logger.info("  → Connecting to OpenRouter + Groq LLM pool...")
+        llm_svc = LLMService()
+
+        logger.info("  → Connecting to Qdrant Vector DB...")
+        qdrant_mgr = QdrantManager()
+
+        logger.info("  → Building Retrieval Service...")
+        retrieval_svc = RetrievalService(qdrant_mgr)
+
+        logger.info("  → Assembling LangGraph Agent Brain...")
+        agent_nodes = AgentNodes(llm_svc, retrieval_svc)
+        workflow = ArcherWorkflow(agent_nodes)
+
+        _services["embedding"] = embedding_svc
+        _services["llm"] = llm_svc
+        _services["qdrant"] = qdrant_mgr
+        _services["retrieval"] = retrieval_svc
+        _services["workflow"] = workflow
+
+        logger.info("✅ All services initialized successfully!")
+
+    return _services
+
+
+@app.on_event("startup")
+async def startup():
+    os.makedirs(TEMP_DIR, exist_ok=True)
+    logger.info("🚀 A.R.C.H.E.R. Server is READY! Visit http://127.0.0.1:8000/docs")
+
+
+# ==========================================
+# BACKGROUND WORKER
+# ==========================================
+def process_document_background(file_path: str, filename: str, doc_id: str):
+    """Background worker: embeds PDF silently. Updates registry when done."""
     try:
-        # Ingestion Pipeline
-        pages_content = ingestion_service.extract_text_from_pdf(file_path)
-        chunks = ingestion_service.create_chunks(pages_content, file.filename)
-        
-        # Embedding Pipeline
-        chunk_texts = [c.text for c in chunks]
-        embeddings = embedding_service.embed_texts(chunk_texts)
-        
-        # Storage Pipeline
-        faiss_store.clear()
-        faiss_store.add_documents(embeddings, chunks)
-        
-        return UploadResponse(
-            doc_id=chunks[0].doc_id if chunks else "N/A",
-            filename=file.filename,
-            chunk_count=len(chunks)
-        )
+        logger.info(f"⚙️ Background processing started: {filename}")
+        _doc_registry[doc_id].status = "processing"
+
+        services = _get_services()
+
+        # 1. Parse and chunk
+        from app.services.ingestion import IngestionService
+        ingestion_svc = IngestionService()
+        chunks = ingestion_svc.process_document(file_path, filename)
+
+        # 2. Embed and insert into Qdrant
+        from llama_index.core.schema import TextNode
+        from llama_index.core import VectorStoreIndex
+
+        nodes = [TextNode(text=c.text, metadata=c.metadata.model_dump()) for c in chunks]
+        index = VectorStoreIndex.from_vector_store(vector_store=services["qdrant"].get_store())
+        index.insert_nodes(nodes)
+
+        # ✅ Mark as READY — user can now query!
+        _doc_registry[doc_id].status = "ready"
+        _doc_registry[doc_id].chunk_count = len(chunks)
+        logger.info(f"✅ {filename} is READY — {len(chunks)} chunks indexed in Qdrant.")
+
+    except Exception as e:
+        # ❌ Mark as FAILED with error message
+        _doc_registry[doc_id].status = "failed"
+        _doc_registry[doc_id].error = str(e)
+        logger.error(f"❌ Background processing failed for {filename}: {e}")
     finally:
-        # Cleanup temp file
         if os.path.exists(file_path):
             os.remove(file_path)
+
+
+# ==========================================
+# ENDPOINTS
+# ==========================================
+@app.post("/upload", response_model=UploadResponse)
+async def upload_pdf(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
+
+    doc_id = str(uuid.uuid4())
+    file_path = os.path.join(TEMP_DIR, f"{doc_id}_{file.filename}")
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # Register document as "processing" immediately
+    _doc_registry[doc_id] = DocumentStatus(
+        doc_id=doc_id,
+        filename=file.filename,
+        status="processing"
+    )
+
+    # Fire off background embedding
+    background_tasks.add_task(process_document_background, file_path, file.filename, doc_id)
+
+    # Return instantly — frontend uses /status/{doc_id} to poll readiness
+    return UploadResponse(
+        doc_id=doc_id,
+        filename=file.filename,
+        status="processing"
+    )
+
+
+@app.get("/status/{doc_id}", response_model=DocumentStatus)
+async def get_document_status(doc_id: str):
+    """
+    Poll this endpoint after upload to know when the document is ready to query.
+    Status flow: processing → ready (or failed)
+    """
+    if doc_id not in _doc_registry:
+        raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found.")
+    return _doc_registry[doc_id]
+
+
+@app.get("/documents", response_model=list[DocumentStatus])
+async def list_documents():
+    """Returns all documents and their current processing status."""
+    return list(_doc_registry.values())
+
 
 @app.post("/query", response_model=QueryResponse)
 async def query_rag(request: QueryRequest):
     try:
-        # Retrieval Pipeline
-        relevant_chunks = retrieval_service.retrieve_context(request.question, top_k=request.top_k)
-        
-        if not relevant_chunks:
-            return QueryResponse(
-                answer="I don't know based on the provided document.",
-                sources=[],
-                context_chunks=[]
-            )
-        
-        # LLM Pipeline
-        context_texts = [c.text for c in relevant_chunks]
-        answer = llm_service.generate_answer(request.question, context_texts)
-        
-        # Extract page numbers for sources
-        sources = sorted(list(set([c.page for c in relevant_chunks])))
-        
+        services = _get_services()
+        session_id = request.session_id or str(uuid.uuid4())
+
+        # Ignite the LangGraph State Machine
+        final_state = services["workflow"].run(request.question, session_id)
+
+        # Format and return response
+        context_chunks = final_state["retrieved_context"]
+        sources = list(set([
+            getattr(c.metadata, 'page', 0) if hasattr(c.metadata, 'page') else 0
+            for c in context_chunks
+        ]))
+
         return QueryResponse(
-            answer=answer,
+            answer=final_state["final_answer"],
             sources=sources,
-            context_chunks=relevant_chunks
+            context_used=context_chunks
         )
     except Exception as e:
+        logger.error(f"Query failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.on_event("startup")
-async def startup_event():
-    # Ensure directories exist
-    os.makedirs(TEMP_DIR, exist_ok=True)
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "ok",
+        "message": "A.R.C.H.E.R. is online",
+        "documents_indexed": len([d for d in _doc_registry.values() if d.status == "ready"])
+    }

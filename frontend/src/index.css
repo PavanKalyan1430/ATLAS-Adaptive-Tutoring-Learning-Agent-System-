@@ -1,35 +1,87 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-@layer base {
-  body {
-    @apply bg-slate-950 text-slate-100 antialiased;
-  }
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Geist', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --color-background: #FDFDFE;
+  --color-surface: #FFFFFF;
+  --color-sidebar: #0A0F1C;
+  
+  --color-accent: #000000;
+  --color-accent-soft: #F3F4F6;
+  
+  --color-text-primary: #09090B;
+  --color-text-secondary: #71717A;
+  
+  --color-border: #E4E4E7;
 }
 
-@layer utilities {
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-transparent;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-slate-700/50 rounded-full border-2 border-slate-900/40 border-solid bg-clip-padding hover:bg-slate-600;
-  }
-  
-  /* Basic animation utilities that standard tailwind natively uses if animate-in plugin is missing */
-  .animate-in {
-    animation-duration: 0.3s;
-    animation-fill-mode: both;
-    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  .fade-in {
-    animation-name: fade-in;
-  }
+:root {
+  color-scheme: light;
 }
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  background-image: 
+    radial-gradient(at 50% 0%, hsla(210,100%,95%,1) 0px, transparent 50vw),
+    radial-gradient(at 100% 0%, hsla(250,100%,96%,1) 0px, transparent 50vw);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4 { 
+  font-family: var(--font-display); 
+  letter-spacing: -0.03em; 
+}
+
+/* Elite Bento Card */
+.bento-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  box-shadow: 
+    0 1px 2px rgba(0,0,0,0.02),
+    0 4px 12px rgba(0,0,0,0.02),
+    0 12px 24px -4px rgba(0,0,0,0.03),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card:hover {
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 
+    0 1px 2px rgba(0,0,0,0.02),
+    0 8px 16px rgba(0,0,0,0.03),
+    0 24px 32px -8px rgba(0,0,0,0.04),
+    inset 0 1px 0 rgba(255,255,255,1);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Premium Inputs */
+.glass-input {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03), inset 0 2px 4px rgba(0,0,0,0.01);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.glass-input:focus-within {
+  border-color: rgba(0,0,0,0.2);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08), inset 0 2px 4px rgba(0,0,0,0.01);
+  transform: translateY(-1px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }

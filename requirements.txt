@@ -1,12 +1,31 @@
+# Core API
 fastapi
 uvicorn
-pymupdf
-sentence-transformers
-faiss-cpu
-groq
-python-dotenv
-pydantic
-httpx
 python-multipart
+httpx
+pydantic>=2.0
+pydantic-settings>=2.0
+python-dotenv
+
+# Machine Learning & AI
 torch
 numpy
+sentence-transformers
+groq
+
+# Retrieval & Agents (A.R.C.H.E.R Core)
+llama-index
+llama-index-llms-groq
+llama-index-vector-stores-qdrant
+llama-index-graph-stores-neo4j
+langgraph
+
+# Ingestion (Layout-Aware PDF Parsing)
+docling
+
+# Database Clients
+qdrant-client
+neo4j
+redis
+asyncpg
+SQLAlchemy

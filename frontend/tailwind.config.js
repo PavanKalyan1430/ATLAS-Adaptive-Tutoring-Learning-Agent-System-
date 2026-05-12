@@ -9,3 +9,6 @@ export default {
   },
   plugins: [],
 }
+
+
+//.\venv\Scripts\uvicorn app.main:app --reload --reload-dir app

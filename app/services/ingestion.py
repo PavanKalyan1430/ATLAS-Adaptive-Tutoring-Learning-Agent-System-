@@ -1,84 +1,92 @@
-import fitz  # PyMuPDF
-import re
 import uuid
 from typing import List
-from app.models.schemas import DocumentMetadata
+import fitz  # PyMuPDF - blazing fast text extraction
+from llama_index.core.node_parser import MarkdownNodeParser
+from llama_index.core import Document
+from app.models.schemas import ChunkSchema, ChunkMetadata, ContentType
+import logging
+
+logger = logging.getLogger("A.R.C.H.E.R.Ingestion")
+
 
 class IngestionService:
-    def __init__(self, chunk_size: int = 600, chunk_overlap: int = 150):
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
+    def __init__(self):
+        # LlamaIndex parser: Splits text intelligently by Markdown headers (#, ##)
+        self.node_parser = MarkdownNodeParser()
 
-    def extract_text_from_pdf(self, pdf_path: str) -> List[dict]:
-        """Extracts text page-wise from a PDF, removing extra whitespaces."""
+    def _extract_text_from_pdf(self, pdf_path: str) -> str:
+        """
+        Extract text from PDF using PyMuPDF.
+        Fast, reliable, and handles 99% of text-based PDFs perfectly.
+        For scanned/image PDFs, we can add OCR as a fallback later.
+        """
         doc = fitz.open(pdf_path)
-        pages_content = []
-        for i, page in enumerate(doc):
+        full_text = ""
+        
+        for page_num, page in enumerate(doc):
             text = page.get_text("text")
-            cleaned_text = self.clean_text(text)
-            if cleaned_text:
-                pages_content.append({"page": i + 1, "text": cleaned_text})
+            if text.strip():
+                # Add a markdown header for each page to preserve page boundaries
+                full_text += f"\n## Page {page_num + 1}\n\n{text}\n"
+        
         doc.close()
-        return pages_content
+        return full_text.strip()
 
-    def clean_text(self, text: str) -> str:
-        """Normalizes text by removing extra whitespaces, basic headers/footers rules."""
-        # Replace multiple whitespaces/newlines with a single space
-        text = re.sub(r'\s+', ' ', text)
-        return text.strip()
+    def _detect_tables_in_text(self, text: str) -> bool:
+        """Basic heuristic to detect if a chunk likely contains a table."""
+        lines = text.strip().split("\n")
+        # Check for consistent pipe-separated or tab-separated lines
+        pipe_lines = sum(1 for line in lines if "|" in line and line.count("|") >= 2)
+        return pipe_lines >= 3
 
-    def create_chunks(self, pages_content: List[dict], filename: str) -> List[DocumentMetadata]:
-        """Semantic chunking: split by sentences/paragraphs rather than raw characters."""
-        chunks = []
+    def process_document(self, pdf_path: str, filename: str) -> List[ChunkSchema]:
+        """
+        Parses a PDF using PyMuPDF for fast text extraction,
+        and chunks semantically using LlamaIndex's MarkdownNodeParser.
+        """
         doc_id = str(uuid.uuid4())
-        chunk_id_counter = 0
-
-        for page in pages_content:
-            text = page["text"]
-            page_num = page["page"]
+        logger.info(f"📄 Processing: {filename} (doc_id: {doc_id})")
+        
+        # 1. Extract text from PDF (fast - takes 1-2 seconds)
+        extracted_text = self._extract_text_from_pdf(pdf_path)
+        logger.info(f"  → Extracted {len(extracted_text)} characters from PDF")
+        
+        if not extracted_text.strip():
+            logger.warning(f"  ⚠️ No text extracted from {filename}. It may be a scanned/image PDF.")
+            return []
+        
+        # 2. Wrap in LlamaIndex Document object
+        llama_doc = Document(
+            text=extracted_text, 
+            metadata={"filename": filename, "doc_id": doc_id}
+        )
+        
+        # 3. Intelligent Semantic Chunking by Markdown headers
+        nodes = self.node_parser.get_nodes_from_documents([llama_doc])
+        logger.info(f"  → Created {len(nodes)} semantic chunks")
+        
+        chunks = []
+        for i, node in enumerate(nodes):
+            # Detect content type
+            is_table = self._detect_tables_in_text(node.text)
+            content_type = ContentType.TABLE if is_table else ContentType.TEXT
             
-            # Split by basic sentence boundaries to avoid breaking mid-sentence
-            sentences = re.split(r'(?<=[.!?]) +', text)
+            # Extract section heading from metadata
+            header_keys = [k for k in node.metadata.keys() if "Header" in k]
+            section_heading = node.metadata[header_keys[-1]] if header_keys else "General"
             
-            current_chunk = ""
-            for sentence in sentences:
-                # If adding the next sentence exceeds chunk size, save current chunk
-                if len(current_chunk) + len(sentence) > self.chunk_size and len(current_chunk) > 0:
-                    chunks.append(DocumentMetadata(
-                        doc_id=doc_id,
-                        page=page_num,
-                        chunk_id=chunk_id_counter,
-                        text=current_chunk.strip(),
-                        source=filename
-                    ))
-                    chunk_id_counter += 1
-                    
-                    # Create overlap by keeping the end of the previous chunk
-                    overlap_start = max(0, len(current_chunk) - self.chunk_overlap)
-                    # We approximate overlap by taking the last N characters of current chunk
-                    # A better way would be word-based, but character based works here.
-                    overlap_text = current_chunk[overlap_start:]
-                    # Ensure we don't start mid-word in the overlap
-                    first_space = overlap_text.find(' ')
-                    if first_space != -1:
-                        overlap_text = overlap_text[first_space+1:]
-                        
-                    current_chunk = overlap_text + " " + sentence
-                else:
-                    if current_chunk:
-                        current_chunk += " " + sentence
-                    else:
-                        current_chunk = sentence
-                        
-            # Add the last chunk if not empty
-            if current_chunk.strip():
-                chunks.append(DocumentMetadata(
+            chunk = ChunkSchema(
+                chunk_id=f"{doc_id}_chunk_{i}",
+                text=node.text.strip(),
+                metadata=ChunkMetadata(
                     doc_id=doc_id,
-                    page=page_num,
-                    chunk_id=chunk_id_counter,
-                    text=current_chunk.strip(),
-                    source=filename
-                ))
-                chunk_id_counter += 1
-                    
+                    filename=filename,
+                    page=1,
+                    content_type=content_type,
+                    section_heading=section_heading
+                )
+            )
+            chunks.append(chunk)
+        
+        logger.info(f"  ✅ Ingestion complete: {len(chunks)} chunks created for {filename}")
         return chunks

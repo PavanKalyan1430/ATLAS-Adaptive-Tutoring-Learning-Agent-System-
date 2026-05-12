@@ -1,52 +1,47 @@
-const API_URL = "http://localhost:8000";
+// Centralized API service layer — all backend communication lives here
+const BASE_URL = 'http://127.0.0.1:8000';
 
-export const uploadPDF = async (file) => {
-  console.log("Starting upload process for file:", file.name, "Size:", file.size);
-  const formData = new FormData();
-  formData.append("file", file);
+export const api = {
+  // Upload a PDF document
+  async uploadDocument(file, onProgress) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${BASE_URL}/upload`, { method: 'POST', body: formData });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
 
-  try {
-    console.log("Sending POST request to:", `${API_URL}/upload`);
-    const response = await fetch(`${API_URL}/upload`, {
-      method: "POST",
-      body: formData, // the browser will automatically set the exact Content-Type with boundary for multipart/form-data
+  // Poll document status until ready
+  async getDocumentStatus(docId) {
+    const res = await fetch(`${BASE_URL}/status/${docId}`);
+    if (!res.ok) throw new Error(`Status check failed for ${docId}`);
+    return res.json();
+  },
+
+  // Get all documents
+  async listDocuments() {
+    const res = await fetch(`${BASE_URL}/documents`);
+    if (!res.ok) return [];
+    return res.json();
+  },
+
+  // Query the AI agent
+  async query(question, sessionId) {
+    const res = await fetch(`${BASE_URL}/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, session_id: sessionId }),
     });
-
-    console.log("Response status:", response.status);
-
-    if (!response.ok) {
-      let errMessage = `HTTP Error ${response.status}`;
-      try {
-        const err = await response.json();
-        console.error("Backend Error Details:", err);
-        errMessage = err.detail || errMessage;
-      } catch (e) {
-        console.error("Could not parse error JSON", e);
-      }
-      throw new Error(errMessage);
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Query failed');
     }
-    
-    const data = await response.json();
-    console.log("Upload Success! Data received:", data);
-    return data;
-  } catch (error) {
-    console.error("Fetch/Network Error in uploadPDF:", error);
-    throw error;
-  }
-};
+    return res.json();
+  },
 
-export const askQuestion = async (question, doc_id) => {
-  const response = await fetch(`${API_URL}/query`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ question, doc_id }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.detail || "Failed to get answer");
-  }
-  return response.json();
+  // Health check
+  async health() {
+    const res = await fetch(`${BASE_URL}/health`);
+    return res.json();
+  },
 };

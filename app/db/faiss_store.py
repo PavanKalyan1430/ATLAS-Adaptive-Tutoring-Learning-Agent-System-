@@ -2,7 +2,7 @@ import faiss
 import numpy as np
 import pickle
 import os
-from typing import List, Dict, Optional
+from typing import List, Dict
 from app.models.schemas import DocumentMetadata
 
 class FAISSStore:
