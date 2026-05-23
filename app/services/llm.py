@@ -1,6 +1,5 @@
 from itertools import cycle
 from llama_index.llms.groq import Groq
-from llama_index.llms.openai_like import OpenAILike
 from llama_index.core import Settings as LlamaIndexSettings
 from app.core.config import settings
 import time
@@ -8,7 +7,7 @@ import logging
 
 logger = logging.getLogger("A.R.C.H.E.R.LLM")
 
-# Groq round-robin key pool for fast agent tasks (Rewriter, Grader, Hallucination Checker)
+# Groq round-robin key pool
 GROQ_KEYS = [
     settings.GROQ_API_KEY_1,
     settings.GROQ_API_KEY_2,
@@ -16,102 +15,77 @@ GROQ_KEYS = [
 ]
 GROQ_KEY_POOL = cycle(GROQ_KEYS)
 
-# OpenRouter fallback models for smart answer generation
-OPENROUTER_SMART_MODELS = [
-    "openai/gpt-oss-20b:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "nousresearch/hermes-3-llama-3.1-405b:free",
-]
-
+# Groq offers both blazing fast and highly intelligent models!
 GROQ_FAST_MODEL = "llama-3.1-8b-instant"
+GROQ_SMART_MODEL = "llama-3.3-70b-versatile"
 
-
-def _build_groq(api_key: str) -> Groq:
+def _build_groq(api_key: str, model: str, temperature: float) -> Groq:
+    """Helper to instantiate a Groq LLM client."""
     return Groq(
-        model=GROQ_FAST_MODEL,
-        api_key=api_key,
-        temperature=0.1,
-    )
-
-
-def _build_openrouter(model: str) -> OpenAILike:
-    return OpenAILike(
         model=model,
-        api_key=settings.OPENROUTER_API_KEY,
-        api_base="https://openrouter.ai/api/v1",
-        temperature=0.3,
-        is_chat_model=True,
-        timeout=90,
+        api_key=api_key,
+        temperature=temperature,
     )
 
-
-class ResilientFastLLM:
+class ResilientGroqLLM:
     """
-    Round-robin across 3 Groq keys for lightning-fast, rate-limit-proof agent calls.
-    Falls back to OpenRouter if all Groq keys are exhausted.
+    Round-robin across 3 Groq keys for lightning-fast, rate-limit-proof calls.
+    It automatically cycles through the API keys if one gets rate-limited.
     """
+    def __init__(self, model: str, temperature: float = 0.1):
+        self.model = model
+        self.temperature = temperature
+        # Pre-instantiate Groq clients to leverage HTTP keep-alive connection pooling
+        self.clients = []
+        for key in GROQ_KEYS:
+            if key and key.strip():
+                self.clients.append(_build_groq(key, self.model, self.temperature))
+        
+        # Fallback if no keys in pool
+        if not self.clients:
+            logger.warning(f"No keys found in pool for model {model}. Using settings.GROQ_API_KEY as fallback.")
+            self.clients.append(_build_groq(settings.GROQ_API_KEY, self.model, self.temperature))
+            
+        self.current_index = 0
 
     def complete(self, prompt: str) -> object:
-        # Try each Groq key in round-robin order
-        for _ in range(len(GROQ_KEYS)):
-            api_key = next(GROQ_KEY_POOL)
+        num_keys = len(self.clients)
+        # Try each pre-instantiated client. We allow 2 full cycles.
+        for attempt in range(num_keys * 2): 
+            client = self.clients[self.current_index]
+            # Rotate key index for the next call
+            self.current_index = (self.current_index + 1) % num_keys
             try:
-                logger.info("FastLLM: Calling Groq (%s...)", api_key[-6:])
-                result = _build_groq(api_key).complete(prompt)
-                return result
+                logger.info(f"LLM: Calling pre-instantiated Groq ({self.model}) client...")
+                return client.complete(prompt)
             except Exception as e:
                 error_str = str(e)
-                if "429" in error_str or "rate" in error_str.lower():
-                    logger.warning("Groq key rate-limited, rotating to next key...")
-                    time.sleep(0.5)
+                if "429" in error_str or "rate" in error_str.lower() or "limit" in error_str.lower():
+                    logger.warning("Groq key rate-limited, rotating to next key in pool...")
+                    time.sleep(0.5) # Brief pause before trying the next key
                     continue
+                # If it's not a rate limit error, raise it immediately
                 raise e
 
-        # All Groq keys exhausted — fall back to OpenRouter fast model
-        logger.warning("All Groq keys rate-limited. Falling back to OpenRouter.")
-        return _build_openrouter("meta-llama/llama-3.2-3b-instruct:free").complete(prompt)
-
-
-class ResilientSmartLLM:
-    """
-    Uses OpenRouter with model fallback chain for high-quality answer generation.
-    Falls back to Groq if OpenRouter is also rate-limited.
-    """
-
-    def complete(self, prompt: str) -> object:
-        # Try each OpenRouter smart model
-        for model in OPENROUTER_SMART_MODELS:
-            try:
-                logger.info("SmartLLM: Calling OpenRouter model: %s", model)
-                result = _build_openrouter(model).complete(prompt)
-                return result
-            except Exception as e:
-                error_str = str(e)
-                if "429" in error_str or "rate" in error_str.lower() or "timeout" in error_str.lower():
-                    logger.warning("OpenRouter model %s rate-limited, trying next...", model)
-                    time.sleep(1)
-                    continue
-                raise e
-
-        # Final fallback: use Groq for smart generation too
-        logger.warning("All OpenRouter models exhausted. Using Groq as final fallback.")
-        api_key = next(GROQ_KEY_POOL)
-        return _build_groq(api_key).complete(prompt)
+        # All Groq keys exhausted
+        logger.error(f"All Groq keys rate-limited for {self.model}.")
+        raise Exception("All Groq API keys are currently rate-limited. Please wait a minute and try again.")
 
 
 class LLMService:
     def __init__(self):
-        self.fast_llm = ResilientFastLLM()
-        self.smart_llm = ResilientSmartLLM()
+        # The Fast LLM is used for intermediate agent steps (Grader, Rewriter, Checker)
+        self.fast_llm = ResilientGroqLLM(model=GROQ_FAST_MODEL, temperature=0.1)
+        
+        # The Smart LLM is used for generating the final comprehensive answer
+        self.smart_llm = ResilientGroqLLM(model=GROQ_SMART_MODEL, temperature=0.3)
 
         # Register a single Groq instance globally for LlamaIndex internals
-        LlamaIndexSettings.llm = _build_groq(GROQ_KEYS[0])
-        logger.info(
-            "LLM Service initialized: 3-key Groq pool (Fast) + OpenRouter fallback chain (Smart)."
-        )
+        LlamaIndexSettings.llm = _build_groq(GROQ_KEYS[0], GROQ_FAST_MODEL, 0.1)
+        logger.info("LLM Service initialized: Pure 3-key Groq pool for both Fast and Smart agents.")
 
-    def get_fast_llm(self) -> ResilientFastLLM:
+    def get_fast_llm(self) -> ResilientGroqLLM:
         return self.fast_llm
 
-    def get_smart_llm(self) -> ResilientSmartLLM:
+    def get_smart_llm(self) -> ResilientGroqLLM:
         return self.smart_llm

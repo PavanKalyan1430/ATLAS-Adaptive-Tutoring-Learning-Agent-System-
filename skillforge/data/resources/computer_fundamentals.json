@@ -1,0 +1,83 @@
+[
+  {
+    "resource_id": "res_cs_os_1",
+    "title": "Operating Systems: Processes vs. Threads",
+    "content": "An Operating System process is an active execution unit of a program. It is heavyweight and has its own isolated address space, environment variables, files, and registers. This isolated address space ensures that one crashing process does not crash another. However, communication between processes is expensive (IPC). A Thread is a lightweight process within a process. Multiple threads of the same process share the same memory space, global variables, and open files. This makes shared memory communication extremely fast. However, because they share memory, threads require explicit synchronization (locks, semaphores) to prevent race conditions, and a single crashing thread can crash the entire process.",
+    "type": "textbook",
+    "topic": "Processes",
+    "difficulty": 0.3,
+    "bloom_level": "remember"
+  },
+  {
+    "resource_id": "res_cs_os_2",
+    "title": "CPU Scheduling Algorithms and Starvation",
+    "content": "The OS scheduler determines which process in the ready queue gets executed by the CPU. In Priority-Based Scheduling, each task is assigned a priority value, and the CPU always executes the task with the highest priority first. While highly effective, this can cause Starvation (Indefinite Blocking) where low-priority tasks sit in the ready queue forever because high-priority tasks keep arriving. To solve starvation, OS schedulers use Aging, a technique that gradually increases the priority of processes that wait in the queue for a long time. Algorithms like Round Robin (RR) allocate equal time slices (quanta) in circular rotation, completely avoiding starvation.",
+    "type": "textbook",
+    "topic": "Scheduling",
+    "difficulty": 0.4,
+    "bloom_level": "understand"
+  },
+  {
+    "resource_id": "res_cs_os_3",
+    "title": "Deadlock Characterization and Prevention",
+    "content": "A deadlock is a situation where a set of processes are blocked because each process is holding a resource and waiting for another resource held by some other process. Coffman identified four necessary and sufficient conditions for a deadlock: (1) Mutual Exclusion: resources cannot be shared, (2) Hold and Wait: processes hold resources while waiting for new ones, (3) No Preemption: resources cannot be forcibly taken from a process, and (4) Circular Wait: a cycle of processes waiting for each other exists. To prevent deadlocks, the OS must eliminate at least one of these conditions. For example, enforcing a total resource ordering eliminates the Circular Wait condition.",
+    "type": "video_transcript",
+    "topic": "Deadlocks",
+    "difficulty": 0.5,
+    "bloom_level": "understand"
+  },
+  {
+    "resource_id": "res_cs_dbms_1",
+    "title": "Relational Database Normalization: 1NF to 3NF",
+    "content": "Normalization organizes relational database tables to minimize redundancy and dependency. First Normal Form (1NF) requires that all columns contain atomic (indivisible) values. Second Normal Form (2NF) requires the table to be in 1NF and all non-key columns must fully depend on the primary key, eliminating partial dependencies. Third Normal Form (3NF) requires 2NF and that no non-key column is transitively dependent on the primary key. Transitive dependency occurs when A -> B and B -> C, making A -> C. Normalizing to 3NF decomposes tables to resolve these dependencies, eliminating insertion, deletion, and update anomalies.",
+    "type": "textbook",
+    "topic": "Normalization",
+    "difficulty": 0.4,
+    "bloom_level": "understand"
+  },
+  {
+    "resource_id": "res_cs_dbms_2",
+    "title": "Database Transactions and ACID Properties",
+    "content": "A database transaction is a logical unit of database processing. To ensure data integrity, relational databases enforce the ACID properties: (1) Atomicity: all operations in the transaction succeed, or the entire transaction is rolled back, (2) Consistency: transaction commits must transition the database from one valid state to another, conforming to all schema constraints, (3) Isolation: concurrent transaction executions yield the exact same state as if executed sequentially (preventing dirty reads, non-repeatable reads), and (4) Durability: once committed, transaction updates are written to non-volatile disk permanently, even in a system crash.",
+    "type": "textbook",
+    "topic": "Transactions",
+    "difficulty": 0.5,
+    "bloom_level": "understand"
+  },
+  {
+    "resource_id": "res_cs_dbms_3",
+    "title": "Indexing with B+ Trees and Disk Optimization",
+    "content": "B+ Trees are the standard index structure for relational database engines. A B+ Tree is a self-balancing search tree where all data (keys + pointers/records) is stored exclusively in leaf nodes, and internal nodes store only routing keys. Because internal nodes do not store actual records, they are small and can have a massive branching factor (fan-out of 100+). This high fan-out keeps the tree height extremely flat (typically 3-4 levels for millions of records). As a result, finding any record requires only 3-4 disk I/O operations. In contrast, unbalanced binary search trees have a branching factor of 2, leading to deep trees and hundreds of slow disk reads.",
+    "type": "video_transcript",
+    "topic": "Indexing",
+    "difficulty": 0.7,
+    "bloom_level": "analyze"
+  },
+  {
+    "resource_id": "res_cs_cn_1",
+    "title": "The OSI Model and Packet Routing",
+    "content": "The OSI reference model standardizes network communication into seven conceptual layers. The lowest layers (Physical, Data Link) handle bit transmissions and frame movements across a single physical wire. The Network Layer (Layer 3) is responsible for logical routing of packets across multiple heterogeneous networks. It uses logical IP addressing (IPv4/IPv6) to route data packets from source to destination. Routers operate at Layer 3, maintaining routing tables and determining the optimal pathway for packets using routing protocols.",
+    "type": "textbook",
+    "topic": "OSI Model",
+    "difficulty": 0.2,
+    "bloom_level": "remember"
+  },
+  {
+    "resource_id": "res_cs_cn_2",
+    "title": "Transport Layer Protocols: TCP vs. UDP",
+    "content": "The Transport Layer (Layer 4) manages host-to-host communication. Transmission Control Protocol (TCP) is connection-oriented, reliable, and guarantees in-order packet delivery using a three-way handshake, sequence numbers, and acknowledgments. It manages flow control (sliding window) and congestion control to prevent network overloading. In contrast, User Datagram Protocol (UDP) is connectionless, unreliable, and fast. It simply shoots packets (datagrams) to the destination without handshakes or delivery verification. UDP is heavily used in real-time gaming, video streaming, and DNS where speed is more critical than 100% reliability.",
+    "type": "textbook",
+    "topic": "TCP/IP",
+    "difficulty": 0.4,
+    "bloom_level": "understand"
+  },
+  {
+    "resource_id": "res_cs_cn_3",
+    "title": "IP Subnetting and Classless Inter-Domain Routing (CIDR)",
+    "content": "IP subnetting splits a large network into smaller, manageable subnets. Subnetting uses a Subnet Mask to determine where the network portion of an IP address ends and the host portion begins. In CIDR notation, a /28 mask means the first 28 bits are network bits, leaving 4 bits (32 - 28) for host addresses. With 4 host bits, we have 2^4 = 16 total IP addresses per subnet. However, two addresses are always reserved: the Subnet Address (all host bits 0) and the Broadcast Address (all host bits 1). Thus, there are 16 - 2 = 14 usable IP addresses for host devices on a /28 subnet.",
+    "type": "video_transcript",
+    "topic": "Subnetting",
+    "difficulty": 0.7,
+    "bloom_level": "apply"
+  }
+]

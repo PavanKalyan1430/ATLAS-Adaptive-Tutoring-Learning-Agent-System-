@@ -25,12 +25,23 @@ export const api = {
     return res.json();
   },
 
-  // Query the AI agent
-  async query(question, sessionId) {
+  // Delete a document
+  async deleteDocument(docId) {
+    const res = await fetch(`${BASE_URL}/documents/${docId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`Delete failed for ${docId}`);
+    return res.json();
+  },
+
+  async query(question, sessionId, searchMode = 'quick') {
+    const backendMode = searchMode === 'fast' || searchMode === 'quick' ? 'quick' : 'deep';
     const res = await fetch(`${BASE_URL}/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, session_id: sessionId }),
+      body: JSON.stringify({ 
+        question, 
+        session_id: sessionId,
+        search_mode: backendMode 
+      }),
     });
     if (!res.ok) {
       const err = await res.json();

@@ -84,32 +84,75 @@ def process_document_background(file_path: str, filename: str, doc_id: str):
     """Background worker: embeds PDF silently. Updates registry when done."""
     try:
         logger.info(f"⚙️ Background processing started: {filename}")
-        _doc_registry[doc_id].status = "processing"
+        if doc_id in _doc_registry:
+            _doc_registry[doc_id].status = "processing"
+            _doc_registry[doc_id].progress = 5.0
 
         services = _get_services()
 
         # 1. Parse and chunk
         from app.services.ingestion import IngestionService
         ingestion_svc = IngestionService()
-        chunks = ingestion_svc.process_document(file_path, filename)
+        chunks = ingestion_svc.process_document(file_path, filename, doc_id)
 
-        # 2. Embed and insert into Qdrant
+        if doc_id in _doc_registry:
+            _doc_registry[doc_id].progress = 35.0
+
+        # 2. Embed and insert into Qdrant in batches
         from llama_index.core.schema import TextNode
         from llama_index.core import VectorStoreIndex
 
-        nodes = [TextNode(text=c.text, metadata=c.metadata.model_dump()) for c in chunks]
+        nodes = []
+        import uuid
+        for c in chunks:
+            meta = c.metadata.model_dump()
+            meta["chunk_id"] = c.chunk_id
+            
+            # Qdrant point IDs must be standard UUIDs or integers.
+            # We generate a deterministic UUID using uuid5 with doc_id as namespace.
+            try:
+                namespace_uuid = uuid.UUID(doc_id)
+                point_id = str(uuid.uuid5(namespace_uuid, c.chunk_id))
+            except Exception:
+                point_id = str(uuid.uuid4())
+                
+            nodes.append(TextNode(id_=point_id, text=c.text, metadata=meta))
+            
         index = VectorStoreIndex.from_vector_store(vector_store=services["qdrant"].get_store())
-        index.insert_nodes(nodes)
+        
+        batch_size = 25
+        total_nodes = len(nodes)
+        if total_nodes == 0:
+            if doc_id in _doc_registry:
+                _doc_registry[doc_id].progress = 95.0
+        else:
+            for i in range(0, total_nodes, batch_size):
+                # Verify document was not deleted in mid-flight
+                if doc_id not in _doc_registry:
+                    logger.info(f"⚠️ Document {doc_id} was deleted during background execution. Terminating task.")
+                    return
+                
+                batch = nodes[i:i+batch_size]
+                index.insert_nodes(batch)
+                
+                pct = 35.0 + ((i + len(batch)) / total_nodes) * 60.0
+                _doc_registry[doc_id].progress = round(min(95.0, pct), 1)
 
         # ✅ Mark as READY — user can now query!
-        _doc_registry[doc_id].status = "ready"
-        _doc_registry[doc_id].chunk_count = len(chunks)
-        logger.info(f"✅ {filename} is READY — {len(chunks)} chunks indexed in Qdrant.")
+        if doc_id in _doc_registry:
+            _doc_registry[doc_id].status = "ready"
+            _doc_registry[doc_id].progress = 100.0
+            _doc_registry[doc_id].chunk_count = len(chunks)
+            logger.info(f"✅ {filename} is READY — {len(chunks)} chunks indexed in Qdrant.")
+        else:
+            logger.info(f"⚠️ Document {doc_id} was deleted during background processing.")
 
     except Exception as e:
         # ❌ Mark as FAILED with error message
-        _doc_registry[doc_id].status = "failed"
-        _doc_registry[doc_id].error = str(e)
+        if doc_id in _doc_registry:
+            _doc_registry[doc_id].status = "failed"
+            _doc_registry[doc_id].progress = 0.0
+            _doc_registry[doc_id].error = str(e)
         logger.error(f"❌ Background processing failed for {filename}: {e}")
     finally:
         if os.path.exists(file_path):
@@ -134,7 +177,8 @@ async def upload_pdf(background_tasks: BackgroundTasks, file: UploadFile = File(
     _doc_registry[doc_id] = DocumentStatus(
         doc_id=doc_id,
         filename=file.filename,
-        status="processing"
+        status="processing",
+        progress=5.0
     )
 
     # Fire off background embedding
@@ -164,6 +208,37 @@ async def list_documents():
     """Returns all documents and their current processing status."""
     return list(_doc_registry.values())
 
+@app.delete("/documents/{doc_id}")
+async def delete_document(doc_id: str):
+    if doc_id not in _doc_registry:
+        raise HTTPException(status_code=404, detail=f"Document '{doc_id}' not found.")
+    
+    try:
+        services = _get_services()
+        from qdrant_client.http import models
+        client = services["qdrant"].client
+        
+        # Delete from Qdrant vector database using metadata filter
+        client.delete(
+            collection_name=services["qdrant"].collection_name,
+            points_selector=models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="doc_id",
+                        match=models.MatchValue(value=doc_id)
+                    )
+                ]
+            )
+        )
+        
+        # Remove from local registry
+        del _doc_registry[doc_id]
+        
+        return {"status": "success", "message": f"Document {doc_id} deleted."}
+    except Exception as e:
+        logger.error(f"Failed to delete {doc_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/query", response_model=QueryResponse)
 async def query_rag(request: QueryRequest):
@@ -172,7 +247,7 @@ async def query_rag(request: QueryRequest):
         session_id = request.session_id or str(uuid.uuid4())
 
         # Ignite the LangGraph State Machine
-        final_state = services["workflow"].run(request.question, session_id)
+        final_state = services["workflow"].run(request.question, session_id, request.search_mode)
 
         # Format and return response
         context_chunks = final_state["retrieved_context"]

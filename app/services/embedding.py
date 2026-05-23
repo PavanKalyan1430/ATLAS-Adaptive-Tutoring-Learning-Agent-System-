@@ -6,8 +6,8 @@ class EmbeddingService:
     def __init__(self):
         # 1. Initialize the embedding model using FastEmbed
         # FastEmbed is written in Rust and uses the ONNX Runtime for extreme CPU optimization.
-        # It is up to 10x faster than HuggingFace's standard PyTorch implementations on CPUs!
-        self.embed_model = FastEmbedEmbedding(model_name="BAAI/bge-base-en-v1.5")
+        # We use bge-small-en-v1.5 which is incredibly fast on CPU and still highly accurate.
+        self.embed_model = FastEmbedEmbedding(model_name="BAAI/bge-small-en-v1.5")
         
         # 2. Register it globally in LlamaIndex
         LlamaIndexSettings.embed_model = self.embed_model

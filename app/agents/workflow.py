@@ -64,11 +64,12 @@ class ArcherWorkflow:
             return "regenerate"
         return "end"
 
-    def run(self, query: str, session_id: str) -> dict:
+    def run(self, query: str, session_id: str, search_mode: str = "quick") -> dict:
         """Executes the workflow and returns the final state."""
         initial_state = {
             "user_query": query,
             "session_id": session_id,
+            "search_mode": search_mode,
             "rewritten_query": "",
             "retrieved_context": [],
             "is_hallucinated": False,

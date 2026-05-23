@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import DocumentsPage from './pages/DocumentsPage';
 import ChatPage from './pages/ChatPage';
 import ArchitecturePage from './pages/ArchitecturePage';
+import PromptsPage from './pages/PromptsPage';
 import { useStore } from './store';
 import { api } from './services/api';
 
@@ -34,11 +35,14 @@ export default function App() {
       for (const doc of processingDocs) {
         try {
           const status = await api.getDocumentStatus(doc.doc_id);
-          if (status.status !== 'processing') {
-            useStore.getState().updateDocumentStatus(doc.doc_id, status.status, status.chunk_count);
-            if (status.status === 'ready' && !useStore.getState().activeDocId) {
-              useStore.getState().setActiveDocId(doc.doc_id);
-            }
+          useStore.getState().updateDocumentStatus(
+            doc.doc_id, 
+            status.status, 
+            status.chunk_count, 
+            status.progress
+          );
+          if (status.status === 'ready' && !useStore.getState().activeDocId) {
+            useStore.getState().setActiveDocId(doc.doc_id);
           }
         } catch (e) {}
       }
@@ -55,6 +59,7 @@ export default function App() {
           <Route path="documents" element={<DocumentsPage />} />
           <Route path="chat" element={<ChatPage />} />
           <Route path="architecture" element={<ArchitecturePage />} />
+          <Route path="prompts" element={<PromptsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

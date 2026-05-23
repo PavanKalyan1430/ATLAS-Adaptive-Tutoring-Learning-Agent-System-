@@ -16,12 +16,16 @@ groq
 # Retrieval & Agents (A.R.C.H.E.R Core)
 llama-index
 llama-index-llms-groq
+llama-index-llms-openai-like
 llama-index-vector-stores-qdrant
 llama-index-graph-stores-neo4j
+llama-index-embeddings-fastembed
+fastembed
 langgraph
 
 # Ingestion (Layout-Aware PDF Parsing)
 docling
+pymupdf
 
 # Database Clients
 qdrant-client

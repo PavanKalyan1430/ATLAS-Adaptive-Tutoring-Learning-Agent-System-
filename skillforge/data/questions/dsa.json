@@ -1,0 +1,137 @@
+[
+  {
+    "question_id": "dsa_arrays_1",
+    "question": "What is the time complexity to access an element in a static array at a specific index?",
+    "options": ["O(1)", "O(log N)", "O(N)", "O(N log N)"],
+    "answer": 0,
+    "topic": "Arrays",
+    "difficulty": 0.2,
+    "bloom_level": "remember"
+  },
+  {
+    "question_id": "dsa_arrays_2",
+    "question": "Which of the following operations takes O(N) time in a dynamic array of size N in the worst case?",
+    "options": ["Reading an element at index i", "Inserting an element at the end when capacity is exceeded", "Updating an element at index i", "Checking if the array is empty"],
+    "answer": 1,
+    "topic": "Arrays",
+    "difficulty": 0.4,
+    "bloom_level": "understand"
+  },
+  {
+    "question_id": "dsa_linkedlist_1",
+    "question": "In a singly linked list of size N, what is the time complexity to insert a new node at the beginning?",
+    "options": ["O(1)", "O(log N)", "O(N)", "O(N^2)"],
+    "answer": 0,
+    "topic": "LinkedLists",
+    "difficulty": 0.3,
+    "bloom_level": "remember"
+  },
+  {
+    "question_id": "dsa_linkedlist_2",
+    "question": "Which algorithm is most efficient for detecting a cycle in a singly linked list?",
+    "options": ["Dijkstra's Algorithm", "Floyd's Cycle-Finding Algorithm (Tortoise and Hare)", "Kruskal's Algorithm", "Binary Search"],
+    "answer": 1,
+    "topic": "LinkedLists",
+    "difficulty": 0.5,
+    "bloom_level": "understand"
+  },
+  {
+    "question_id": "dsa_stacks_1",
+    "question": "Which data structure follows the Last-In, First-Out (LIFO) order of operation?",
+    "options": ["Queue", "Binary Tree", "Stack", "Min-Heap"],
+    "answer": 2,
+    "topic": "Stacks",
+    "difficulty": 0.2,
+    "bloom_level": "remember"
+  },
+  {
+    "question_id": "dsa_stacks_2",
+    "question": "When converting an infix expression to a postfix expression using a stack, what is done when an incoming operator has a lower precedence than the operator at the top of the stack?",
+    "options": ["The operator is pushed onto the stack immediately", "Operators are popped from the stack until precedence criteria are met", "The expression is declared invalid", "The stack is cleared entirely"],
+    "answer": 1,
+    "topic": "Stacks",
+    "difficulty": 0.6,
+    "bloom_level": "apply"
+  },
+  {
+    "question_id": "dsa_queues_1",
+    "question": "What is the primary operational ordering difference between a queue and a stack?",
+    "options": ["Queues are LIFO, Stacks are FIFO", "Queues are FIFO, Stacks are LIFO", "Queues and Stacks are both FIFO", "Queues and Stacks are both LIFO"],
+    "answer": 1,
+    "topic": "Queues",
+    "difficulty": 0.2,
+    "bloom_level": "remember"
+  },
+  {
+    "question_id": "dsa_queues_2",
+    "question": "In a circular queue implemented using an array of size C, how do you determine if the queue is full, where 'front' is the start index and 'rear' is the end index?",
+    "options": ["(rear + 1) % C == front", "(front + 1) % C == rear", "rear == front", "rear - front == C"],
+    "answer": 0,
+    "topic": "Queues",
+    "difficulty": 0.5,
+    "bloom_level": "understand"
+  },
+  {
+    "question_id": "dsa_trees_1",
+    "question": "What is the maximum number of children any node can have in a Binary Tree?",
+    "options": ["1", "2", "3", "Unlimited"],
+    "answer": 1,
+    "topic": "Trees",
+    "difficulty": 0.2,
+    "bloom_level": "remember"
+  },
+  {
+    "question_id": "dsa_trees_2",
+    "question": "If you perform an in-order traversal on a valid Binary Search Tree (BST), in what order will the values be output?",
+    "options": ["Descending sorted order", "Ascending sorted order", "Breadth-first order", "Random insertion order"],
+    "answer": 1,
+    "topic": "Trees",
+    "difficulty": 0.5,
+    "bloom_level": "understand"
+  },
+  {
+    "question_id": "dsa_trees_3",
+    "question": "What is the worst-case time complexity of searching for an element in an unbalanced Binary Search Tree (BST) of N elements?",
+    "options": ["O(1)", "O(log N)", "O(N)", "O(N log N)"],
+    "answer": 2,
+    "topic": "Trees",
+    "difficulty": 0.6,
+    "bloom_level": "analyze"
+  },
+  {
+    "question_id": "dsa_graphs_1",
+    "question": "Which traversal algorithm uses a Queue to explore all nodes at the current depth before moving to the next level?",
+    "options": ["Depth First Search (DFS)", "Breadth First Search (BFS)", "Prim's Algorithm", "A* Search"],
+    "answer": 1,
+    "topic": "Graphs",
+    "difficulty": 0.4,
+    "bloom_level": "understand"
+  },
+  {
+    "question_id": "dsa_graphs_2",
+    "question": "What is the time complexity of Dijkstra's algorithm for finding the single-source shortest path in a graph with V vertices and E edges using a binary heap?",
+    "options": ["O(V + E)", "O(V log V)", "O((V + E) log V)", "O(V^2)"],
+    "answer": 2,
+    "topic": "Graphs",
+    "difficulty": 0.7,
+    "bloom_level": "apply"
+  },
+  {
+    "question_id": "dsa_dp_1",
+    "question": "What are the two primary requirements/properties that a problem must exhibit to be solved using Dynamic Programming?",
+    "options": ["Divide and conquer approach & linear space constraints", "Greedy choice property & sorted array inputs", "Overlapping subproblems & optimal substructure", "Static stack variables & circular queues"],
+    "answer": 2,
+    "topic": "Dynamic Programming",
+    "difficulty": 0.6,
+    "bloom_level": "understand"
+  },
+  {
+    "question_id": "dsa_dp_2",
+    "question": "What is the time complexity to solve the standard 0/1 Knapsack problem with N items and maximum weight capacity W using standard bottom-up Dynamic Programming?",
+    "options": ["O(2^N)", "O(N * W)", "O(N log N)", "O(N + W)"],
+    "answer": 1,
+    "topic": "Dynamic Programming",
+    "difficulty": 0.8,
+    "bloom_level": "apply"
+  }
+]

@@ -4,32 +4,30 @@ from llama_index.vector_stores.qdrant import QdrantVectorStore
 from app.core.config import settings
 import logging
 
-logger = logging.getLogger("A.R.C.H.E.R.Qdrant")
+logger = logging.getLogger("SkillForge.Qdrant")
 
-# bge-small-en-v1.5 → 384-dim dense vectors (fast, accurate)
+# BGE-small uses 384-dimensional dense vectors
 DENSE_VECTOR_SIZE = 384
 
 class QdrantManager:
-    def __init__(self, collection_name: str = "archer_documents"):
+    def __init__(self, collection_name: str = settings.QDRANT_COLLECTION):
         self.collection_name = collection_name
         try:
             self.client = QdrantClient(url=settings.QDRANT_URL, timeout=3.0)
-            # Test connection to ensure server is actually reachable
             self.client.get_collections()
             logger.info("🔌 Connected to Qdrant Docker service successfully.")
         except Exception as e:
             logger.warning(
                 f"⚠️ Could not reach Qdrant Docker service at {settings.QDRANT_URL}: {e}. "
-                "Falling back to local on-disk Qdrant storage for high resilience!"
+                "Falling back to local on-disk Qdrant storage for resilience!"
             )
             import os
-            os.makedirs("temp_uploads/local_qdrant", exist_ok=True)
-            self.client = QdrantClient(path="temp_uploads/local_qdrant")
+            os.makedirs("temp_uploads/local_qdrant_sf", exist_ok=True)
+            self.client = QdrantClient(path="temp_uploads/local_qdrant_sf")
         
         self._ensure_collection_exists()
 
-        # enable_hybrid=True activates Qdrant's native RRF fusion
-        # (dense bge-small + sparse SPLADE_PP_en_v1 — already cached locally)
+        # Hybrid search setup (dense embedding + sparse SPLADE)
         self.vector_store = QdrantVectorStore(
             client=self.client,
             collection_name=self.collection_name,
@@ -39,16 +37,20 @@ class QdrantManager:
         )
 
     def _ensure_collection_exists(self):
-        """Creates or auto-repairs the collection if the vector size is wrong."""
-        collections = self.client.get_collections().collections
+        """Builds or repairs the collection with hybrid configurations."""
+        try:
+            collections = self.client.get_collections().collections
+        except Exception:
+            collections = []
+            
         existing = next((c for c in collections if c.name == self.collection_name), None)
 
         if existing:
-            info = self.client.get_collection(self.collection_name)
             try:
+                info = self.client.get_collection(self.collection_name)
                 current_size = info.config.params.vectors.size
-            except AttributeError:
-                current_size = DENSE_VECTOR_SIZE  # Already correct format
+            except Exception:
+                current_size = DENSE_VECTOR_SIZE
 
             has_sparse = False
             try:

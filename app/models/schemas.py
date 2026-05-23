@@ -13,7 +13,6 @@ class ContentType(str, Enum):
 
 class SearchMode(str, Enum):
     VECTOR = "vector"
-    GRAPH = "graph"
     HYBRID = "hybrid"
 
 # ==========================================
@@ -35,12 +34,7 @@ class ChunkSchema(BaseModel):
     metadata: ChunkMetadata
     embedding: Optional[List[float]] = None
 
-class GraphNodeSchema(BaseModel):
-    """Represents an entity and its relationship in Neo4j."""
-    subject: str
-    predicate: str
-    object: str
-    source_chunk_id: str
+
 
 # ==========================================
 # 3. API SCHEMAS (Frontend <-> Backend)
@@ -62,13 +56,15 @@ class DocumentStatus(BaseModel):
     filename: str
     status: str  # processing | ready | failed
     chunk_count: Optional[int] = None
+    progress: Optional[float] = 0.0
     error: Optional[str] = None
 
 class QueryRequest(BaseModel):
     question: str
-    session_id: Optional[str] = None # Crucial for Redis chat history
+    session_id: Optional[str] = None # Used to track conversations client-side
     mode: SearchMode = SearchMode.HYBRID
     top_k: int = 5
+    search_mode: str = "quick" # "quick" (Flash) or "deep" (Pro)
 
 class AgentThought(BaseModel):
     """Used for SSE streaming to show the user what the AI is doing."""

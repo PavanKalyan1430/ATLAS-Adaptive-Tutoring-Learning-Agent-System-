@@ -5,6 +5,7 @@ import { Workflow, Activity, Cpu, Clock, CheckCircle2, Zap } from 'lucide-react'
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { motion } from 'framer-motion';
+import { Terminal } from '../components/ui/terminal';
 
 function cn(...inputs) { return twMerge(clsx(inputs)); }
 
@@ -104,6 +105,29 @@ export default function ArchitecturePage() {
           </div>
         </div>
       </header>
+
+      {/* Terminal Boot Sequence */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="mb-8 w-full">
+        <Terminal 
+          className="max-w-none w-full"
+          commands={[
+            "archer-core --start-sequence",
+            "Connecting to Qdrant Vector Engine...",
+            "Loading bge-large-en-v1.5 embedding weights...",
+            "Verifying OpenRouter LLM Gateway ping...",
+            "LangGraph State Machine [ONLINE]"
+          ]}
+          outputs={{
+            0: ["Initializing distributed inference cluster..."],
+            1: ["✔ Connected to localhost:6333 [Latency: 14ms]"],
+            2: ["✔ Weights loaded into VRAM (3.4GB alloc)"],
+            3: ["✔ Ping OpenRouter API... [245ms]"],
+            4: ["Autonomous routing engine is now accepting requests."]
+          }}
+          typingSpeed={30}
+          delayBetweenCommands={500}
+        />
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-[700px] relative z-10">
         

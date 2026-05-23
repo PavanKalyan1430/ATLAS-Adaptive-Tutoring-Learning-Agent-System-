@@ -1,0 +1,25 @@
+fastapi
+uvicorn
+python-multipart
+httpx
+pydantic>=2.0
+pydantic-settings>=2.0
+python-dotenv
+
+# Machine Learning & LLM
+torch
+numpy
+sentence-transformers
+groq
+fastembed
+
+# Multi-Agent & Graphs
+langgraph
+networkx
+
+# Databases
+qdrant-client
+redis
+asyncpg
+SQLAlchemy
+psycopg2-binary
