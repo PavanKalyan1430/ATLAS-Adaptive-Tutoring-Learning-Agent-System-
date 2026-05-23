@@ -4,6 +4,35 @@
 
 ---
 
+## 📌 Table of Contents
+* [🧭 System Overview (A to Z Masterclass)](#-system-overview-a-to-z-masterclass)
+* [🎨 Enterprise Systems Architecture](#-enterprise-systems-architecture)
+* [📁 System Directory Tree & Detailed Registry](#-system-directory-tree-detailed-registry)
+* [🧱 Module-by-Module Technical Deep Dive](#-module-by-module-technical-deep-dive)
+  * [1. Unified Application Settings (`config.py`)](#1-unified-application-settings-configpy)
+  * [2. Relational Database Interface & Fallbacks (`postgres.py`)](#2-relational-database-interface--fallbacks-postgrespy)
+  * [3. Asynchronous Cache & InMemory Emulations (`redis_client.py`)](#3-asynchronous-cache--inmemory-emulations-redis_clientpy)
+  * [4. Semantic Search & Vector Operations (`qdrant.py`)](#4-semantic-search--vector-operations-qdrantpy)
+  * [5. Resilient LLM Load Balancing Pool (`llm.py`)](#5-resilient-llm-load-balancing-pool-llmpy)
+  * [6. Wires & Compiled Workflow Graph (`orchestrator.py`)](#6-wires--compiled-workflow-graph-orchestratorpy)
+  * [7. Item Response Theory Diagnostics (`diagnostic_agent.py`)](#7-item-response-theory-diagnostics-diagnostic_agentpy)
+  * [8. Topological Curriculum Planner (`planner_agent.py`)](#8-topological-curriculum-planner-planner_agentpy)
+  * [9. Semantic Grading Engine (`evaluation_agent.py`)](#9-semantic-grading-engine-evaluation_agentpy)
+  * [10. Performance Audit & Nudge Generator (`intervention_agent.py`)](#10-performance-audit--nudge-generator-intervention_agentpy)
+  * [11. WebSocket Communications Tunnel (`websocket.py`)](#11-websocket-communications-tunnel-websocketpy)
+* [🔌 API Endpoint Specifications & Schema Maps](#-api-endpoint-specifications-schema-maps)
+  * [1. REST API Definition](#1-rest-api-definition)
+  * [2. WebSocket Broadcast Specifications](#2-websocket-broadcast-specifications)
+* [🎨 Frontend Architecture & Visual Bindings](#-frontend-architecture--visual-bindings)
+  * [1. Global Store State Engine (`store.js`)](#1-global-store-state-engine-storejs)
+  * [2. Prerequisite Graph Canvas Component (`DAGCanvas.jsx`)](#2-prerequisite-graph-canvas-component-dagcanvasjsx)
+  * [3. Competency Breakdown Heatmap (`CompetencyHeatmap.jsx`)](#3-competency-breakdown-heatmap-competencyheatmapjsx)
+* [💻 Local Development Setup & Operation](#-local-development-setup--operation)
+* [🎓 Ultimate Gold-Standard Technical Interview Q&A (Crush the Panel)](#-ultimate-gold-standard-technical-interview-qa-crush-the-panel)
+* [🏆 Key Architectural Design Patterns to Mention](#-key-architectural-design-patterns-to-mention)
+
+---
+
 ## 🧭 System Overview (A to Z Masterclass)
 
 ATLAS is an **enterprise-grade, stateful, multi-agent AI tutor** designed to replicate a highly adaptive human educator. Traditional AI tutoring systems fail because they are stateless, rely on simplistic RAG chatbot models, and suffer from "information overload" (presenting beginners with doctoral-level content, or vice versa). 
