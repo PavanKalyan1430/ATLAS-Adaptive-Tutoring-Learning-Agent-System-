@@ -1,0 +1,102 @@
+[
+  {
+    "resource_id": "res_fund_os_sched",
+    "title": "CPU Scheduling Algorithms in Operating Systems",
+    "content": "CPU scheduling is the process by which the operating system decides which process in the ready queue gets allocated the CPU. Common algorithms include: (1) First-Come First-Served (FCFS): simple, non-preemptive, but suffers from the 'convoy effect' where short processes wait behind long ones. (2) Shortest Job First (SJF): optimal average waiting time, but hard to predict CPU burst time and can cause starvation. (3) Round Robin (RR): preemptive scheduling designed for timesharing, where each process is given a small time slice (quantum). It ensures fair sharing but can incur high context switching overhead if the quantum is too small.",
+    "type": "textbook",
+    "topic": "os_scheduling",
+    "difficulty": 0.2,
+    "bloom_level": "remembering",
+    "subject": "computer_fundamentals"
+  },
+  {
+    "resource_id": "res_fund_os_mem",
+    "title": "Virtual Memory and Paging",
+    "content": "Virtual memory is a memory management technique that creates an illusion of a very large main memory by mapping process virtual addresses to physical addresses in RAM or secondary storage (swap space). It uses Paging, where physical memory is divided into fixed-size blocks called Frames, and logical memory is divided into blocks of the same size called Pages. A Page Table tracks these mappings. When a process requests a page not currently in RAM, a Page Fault occurs, triggering the OS to retrieve it from secondary storage using page replacement algorithms like FIFO, LRU, or Optimal Page Replacement.",
+    "type": "textbook",
+    "topic": "os_memory_management",
+    "difficulty": 0.5,
+    "bloom_level": "understanding",
+    "subject": "computer_fundamentals"
+  },
+  {
+    "resource_id": "res_fund_os_deadlock",
+    "title": "System Deadlocks and Banker's Algorithm",
+    "content": "A deadlock is a state where a set of processes are blocked because each process is holding a resource and waiting for another resource held by another process in the same set. Four Coffman conditions must hold simultaneously for a deadlock: (1) Mutual Exclusion; (2) Hold and Wait; (3) No Preemption; (4) Circular Wait. Deadlock prevention breaks one of these conditions. Deadlock avoidance uses algorithms like the Banker's Algorithm, which dynamically evaluates resource requests based on maximum claims, allocation matrices, and available vectors to guarantee the system never enters an 'unsafe' state that could lead to deadlocks.",
+    "type": "textbook",
+    "topic": "os_deadlocks",
+    "difficulty": 0.7,
+    "bloom_level": "applying",
+    "subject": "computer_fundamentals"
+  },
+  {
+    "resource_id": "res_fund_os_ex",
+    "title": "Exercise: Deadlock Safety Check",
+    "content": "Write a step-by-step trace of the Banker's Algorithm to determine if a system is in a safe state. Suppose we have 3 processes (P0, P1, P2) and 1 resource type with 10 total instances. Let the allocation state be: P0 holds 3, P1 holds 2, P2 holds 2 (total allocated = 7, available = 3). The maximum demands are: P0 requires 7, P1 requires 4, P2 requires 5. Show if a safe sequence exists, and write the sequence. Explain why or why not.",
+    "type": "exercise",
+    "topic": "os_deadlocks",
+    "difficulty": 0.6,
+    "bloom_level": "applying",
+    "subject": "computer_fundamentals"
+  },
+  {
+    "resource_id": "res_fund_dbms_normal",
+    "title": "Database Normalization (1NF, 2NF, 3NF, BCNF)",
+    "content": "Normalization is a database design technique used to organize tables to minimize redundancy and dependency anomalies (insertion, update, deletion anomalies). (1) 1NF: requires all column values to be atomic (no multi-valued attributes). (2) 2NF: must be in 1NF and eliminate partial dependencies (where a non-prime attribute depends on a subset of a composite primary key). (3) 3NF: must be in 2NF and eliminate transitive dependencies (where a non-prime attribute depends on another non-prime attribute). (4) BCNF: a stricter version of 3NF where for every functional dependency X -> Y, X must be a superkey.",
+    "type": "textbook",
+    "topic": "dbms_normalization",
+    "difficulty": 0.3,
+    "bloom_level": "remembering",
+    "subject": "computer_fundamentals"
+  },
+  {
+    "resource_id": "res_fund_dbms_index",
+    "title": "Database Indexing and B+ Trees",
+    "content": "Database indexing speeds up retrieval operations by creating data structures that locate records without scanning the entire table (Full Table Scan). B+ Trees are the standard index structures in relational databases. Unlike binary trees, a B+ Tree node has a high branching factor (can have hundreds of children), keeping the tree extremely short and flat. This minimizes disk page reads. In a B+ Tree, all data records are stored in leaf nodes, which are linked together in a doubly-linked list to facilitate highly efficient range queries, while internal nodes store only index keys and pointers to route lookups.",
+    "type": "textbook",
+    "topic": "dbms_indexing",
+    "difficulty": 0.5,
+    "bloom_level": "understanding",
+    "subject": "computer_fundamentals"
+  },
+  {
+    "resource_id": "res_fund_dbms_acid",
+    "title": "ACID Properties of Transactions",
+    "content": "A database transaction is a logical unit of work. To maintain integrity, databases enforce ACID properties: (1) Atomicity: 'All or nothing' — either all operations of the transaction commit, or all are rolled back. (2) Consistency: The database must transition from one valid state to another, maintaining all integrity constraints. (3) Isolation: Concurrent execution of transactions yields the same state as if they executed serially. (4) Durability: Once a transaction commits, its changes survive system crashes and are permanently saved.",
+    "type": "textbook",
+    "topic": "dbms_transactions",
+    "difficulty": 0.6,
+    "bloom_level": "applying",
+    "subject": "computer_fundamentals"
+  },
+  {
+    "resource_id": "res_fund_dbms_ex",
+    "title": "Exercise: DBMS Normalization Evaluation",
+    "content": "Consider a relation R(Student_ID, Course_ID, Instructor_Name, Instructor_Room) with functional dependencies: {Student_ID, Course_ID} -> Instructor_Name; Instructor_Name -> Instructor_Room. (1) Identify the primary key. (2) Determine the current normal form of the relation R (1NF, 2NF, or 3NF). (3) Normalize the relation to 3NF, showing your step-by-step decomposition. Write your answer with code block explanations.",
+    "type": "exercise",
+    "topic": "dbms_normalization",
+    "difficulty": 0.6,
+    "bloom_level": "applying",
+    "subject": "computer_fundamentals"
+  },
+  {
+    "resource_id": "res_fund_cn_osi",
+    "title": "The 7 Layers of the OSI Model",
+    "content": "The OSI (Open Systems Interconnection) model is a conceptual framework that standardizes network communication into 7 distinct layers: (1) Physical: electrical and mechanical transmissions (bits); (2) Data Link: physical addressing and frame delivery (MAC address); (3) Network: routing packets across networks using logical addresses (IP); (4) Transport: end-to-end connection and error recovery (TCP/UDP segments); (5) Session: managing dialogues and sessions; (6) Presentation: data translation, formatting, and encryption; (7) Application: user interfaces and network services (HTTP, DNS).",
+    "type": "textbook",
+    "topic": "cn_osi_model",
+    "difficulty": 0.2,
+    "bloom_level": "remembering",
+    "subject": "computer_fundamentals"
+  },
+  {
+    "resource_id": "res_fund_cn_ex",
+    "title": "Exercise: TCP vs UDP Comparison",
+    "content": "Analyze the operational differences between TCP and UDP. Explain the three-way handshake process of TCP (SYN -> SYN-ACK -> ACK) and why it guarantees reliability, and compare it to the lightweight, connectionless nature of UDP. Write a python script simulating a mock socket setup (using explanations in comments) that demonstrates when you would choose UDP over TCP for streaming applications.",
+    "type": "exercise",
+    "topic": "cn_tcp_ip",
+    "difficulty": 0.5,
+    "bloom_level": "applying",
+    "subject": "computer_fundamentals"
+  }
+]

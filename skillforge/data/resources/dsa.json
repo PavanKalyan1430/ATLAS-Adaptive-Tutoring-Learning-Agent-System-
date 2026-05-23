@@ -1,0 +1,142 @@
+[
+  {
+    "resource_id": "res_dsa_arrays_basic",
+    "title": "Introduction to Array Data Structures",
+    "content": "An array is a linear data structure that stores elements of the same data type in contiguous memory locations. Because the memory is contiguous, arrays allow O(1) constant-time access to any element by its index: Address(A[i]) = BaseAddress + i * ElementSize. However, arrays have fixed sizes, and inserting or deleting an element in the middle requires shifting adjacent elements, which takes O(N) linear time. Array search takes O(N) time unless the array is sorted, in which case Binary Search can be used to search in O(log N) time.",
+    "type": "textbook",
+    "topic": "arrays",
+    "difficulty": 0.2,
+    "bloom_level": "remembering",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_arrays_intermediate",
+    "title": "Searching and Binary Search in Arrays",
+    "content": "Binary search is an optimal search algorithm for sorted arrays. It works on the divide-and-conquer principle. In each step, the algorithm compares the target value with the middle element of the array. If they are equal, the index is returned. If the target is smaller, the search continues in the left half; if larger, it searches the right half. The size of the search space is halved in each step, yielding a logarithmic time complexity of O(log N). The space complexity is O(1) for iterative implementations.",
+    "type": "textbook",
+    "topic": "arrays",
+    "difficulty": 0.4,
+    "bloom_level": "understanding",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_arrays_advanced",
+    "title": "Subarray Problems and Kadane's Algorithm",
+    "content": "A subarray is a contiguous slice of an array. A common advanced problem is finding the maximum sum of any contiguous subarray. A naive nested loop solution takes O(N^2) time. Kadane's Algorithm solves it in O(N) time and O(1) space. It maintains two variables during a single linear iteration: 'max_ending_here' (which accumulates the subarray sum and resets to 0 if it becomes negative) and 'max_so_far' (which tracks the global maximum encountered). This is a classic example of dynamic programming where we build the optimal solution from subproblems.",
+    "type": "textbook",
+    "topic": "arrays",
+    "difficulty": 0.7,
+    "bloom_level": "applying",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_arrays_ex",
+    "title": "Exercise: Adjacent Maximum Sum",
+    "content": "Write a Python function `max_adjacent_sum(arr)` that takes an array of integers and returns the maximum sum of two adjacent elements. Your solution should operate in O(N) time and O(1) auxiliary space. Example: Input `[1, 5, 2, 7, 3]`, output should be `9` (which is 2 + 7). Provide a step-by-step description of your algorithm's logic alongside the code.",
+    "type": "exercise",
+    "topic": "arrays",
+    "difficulty": 0.5,
+    "bloom_level": "applying",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_linked_lists_basic",
+    "title": "Singly Linked List Fundamentals",
+    "content": "A linked list is a linear data structure where elements are stored in nodes. Each node contains a data field and a reference ('next') pointer to the next node in the sequence. Unlike arrays, nodes are not stored in contiguous memory locations but are allocated dynamically in heap space. This allows dynamic sizing and efficient O(1) insertions/deletions at the head. However, random access is not supported; accessing the i-th element requires traversing from the head node, taking O(N) linear time.",
+    "type": "textbook",
+    "topic": "linked_lists",
+    "difficulty": 0.2,
+    "bloom_level": "remembering",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_linked_lists_intermediate",
+    "title": "In-Place Singly Linked List Reversal",
+    "content": "Reversing a singly linked list in-place is a fundamental pointer manipulation operation. To accomplish this iteratively, we maintain three pointers: 'prev' (initialized to None), 'curr' (initialized to head), and 'nxt' (to temporarily hold reference to the next node). In each step of the loop: we save the next node reference (`nxt = curr.next`), reverse the current node's pointer (`curr.next = prev`), advance 'prev' to 'curr', and advance 'curr' to 'nxt'. The loop repeats until 'curr' is None, at which point 'prev' becomes the new head of the reversed list. Time: O(N), Space: O(1).",
+    "type": "textbook",
+    "topic": "linked_lists",
+    "difficulty": 0.5,
+    "bloom_level": "understanding",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_linked_lists_ex",
+    "title": "Exercise: Detect Loop in Linked List",
+    "content": "Write a Python function `has_cycle(head)` that takes the head of a singly linked list and returns `True` if there is a cycle (loop) in the list, and `False` otherwise. Your algorithm must utilize Floyd's Tortoise and Hare (two-pointer) approach to guarantee O(N) runtime and O(1) extra space. Explain why this approach works.",
+    "type": "exercise",
+    "topic": "linked_lists",
+    "difficulty": 0.6,
+    "bloom_level": "applying",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_stacks_basic",
+    "title": "Stack Data Structure Principles",
+    "content": "A Stack is a linear data structure that operates under the Last In First Out (LIFO) protocol. It behaves like a stack of plates: elements are pushed onto the top and popped off the top. All operations occur at a single end called the 'top'. Core operations are `push(x)` (inserting element, O(1)), `pop()` (removing top element, O(1)), and `peek()` (viewing top element without removal, O(1)). Stacks are used extensively in function execution call-stacks, recursion management, backtracking, and expression evaluation.",
+    "type": "textbook",
+    "topic": "stacks",
+    "difficulty": 0.2,
+    "bloom_level": "remembering",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_stacks_ex",
+    "title": "Exercise: Balanced Parentheses Checker",
+    "content": "Design an algorithm using a stack to check if a string of brackets `(), [], {}` is balanced. A string is balanced if brackets are closed in the correct order. Write a Python function `is_balanced(s)` returning `True` or `False`. Example: `'{[()]}'` is balanced, while `'{[(])}'` is not. Describe your logic clearly.",
+    "type": "exercise",
+    "topic": "stacks",
+    "difficulty": 0.5,
+    "bloom_level": "applying",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_trees_basic",
+    "title": "Binary Tree Structures and Traversals",
+    "content": "A binary tree is a hierarchical data structure where each node has at most two children. The topmost node is the root. Tree traversals are algorithms that visit all nodes in a structured sequence. The three main depth-first traversals are: (1) Pre-order: Root -> Left -> Right; (2) In-order: Left -> Root -> Right; (3) Post-order: Left -> Right -> Root. Depth-first traversals naturally use recursion, which leverages the system call-stack. Level-order (breadth-first) traversal visits nodes level-by-level using a queue.",
+    "type": "textbook",
+    "topic": "trees",
+    "difficulty": 0.3,
+    "bloom_level": "remembering",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_trees_intermediate",
+    "title": "Binary Search Tree (BST) and Skewed Cases",
+    "content": "A Binary Search Tree (BST) is a binary tree with the ordering property: for any node, all elements in its left subtree are smaller than its value, and all elements in its right subtree are larger. Under average conditions, searching, inserting, and deleting nodes takes O(log N) time because we discard half the tree at each step. However, if keys are inserted in sorted order, the BST becomes a 'skewed' degenerate tree (similar to a linked list), and the search time complexity degrades to O(N) worst-case. Self-balancing trees like AVL or Red-Black trees resolve this by maintaining a balanced height of O(log N).",
+    "type": "textbook",
+    "topic": "trees",
+    "difficulty": 0.6,
+    "bloom_level": "understanding",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_trees_ex",
+    "title": "Exercise: BST In-Order Successor",
+    "content": "Explain how to find the 'In-Order Successor' of a given node in a Binary Search Tree. The successor is the node with the smallest key greater than the target node. Write a Python function `inorder_successor(root, node)` that implements this search in O(H) time, where H is the height of the tree. Explain the two main cases: (1) when the target node has a right child, and (2) when it does not.",
+    "type": "exercise",
+    "topic": "trees",
+    "difficulty": 0.7,
+    "bloom_level": "applying",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_graphs_basic",
+    "title": "Graph Representations and BFS traversal",
+    "content": "A graph G = (V, E) consists of a set of vertices V and edges E. There are two primary representations: (1) Adjacency Matrix: a 2D array of size V x V. Edge lookups take O(1) time, but space complexity is O(V^2), which is highly inefficient for sparse graphs. (2) Adjacency List: an array of size V where each entry is a list of adjacent neighbors. Space complexity is O(V + E), which is optimal. Breadth-First Search (BFS) is a graph traversal that starts at a source vertex and explores all neighbor vertices at the current depth before moving to the next level. It uses a FIFO Queue and a visited set, operating in O(V + E) time.",
+    "type": "textbook",
+    "topic": "graphs",
+    "difficulty": 0.4,
+    "bloom_level": "understanding",
+    "subject": "dsa"
+  },
+  {
+    "resource_id": "res_dsa_graphs_ex",
+    "title": "Exercise: Dijkstra's Shortest Path",
+    "content": "Implement Dijkstra's Algorithm in Python to find the shortest path from a source node to all other nodes in a weighted graph with non-negative edge weights. Your function `dijkstra(graph, start)` should represent the graph as an adjacency list with weight parameters, and utilize a priority queue (Python's `heapq` module) to maintain a priority of unvisited nodes. Return a dictionary of shortest distances. Explain the time complexity.",
+    "type": "exercise",
+    "topic": "graphs",
+    "difficulty": 0.8,
+    "bloom_level": "applying",
+    "subject": "dsa"
+  }
+]

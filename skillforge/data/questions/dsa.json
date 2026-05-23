@@ -1,0 +1,209 @@
+[
+  {
+    "question_id": "q_dsa_arrays_1",
+    "question": "What is the time complexity of searching for an element in an unsorted array of size N using linear search?",
+    "options": ["O(1)", "O(log N)", "O(N)", "O(N log N)"],
+    "correct_option_idx": 2,
+    "difficulty": 0.2,
+    "bloom_level": "remembering",
+    "topic_tag": "arrays",
+    "explanation": "Linear search checks each element of the array sequentially, taking O(N) comparisons in the worst case.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_arrays_2",
+    "question": "You are given a sorted array. Which algorithm is best suited to find the position of a target value in O(log N) time?",
+    "options": ["Linear Search", "Binary Search", "Depth-First Search", "Bubble Sort"],
+    "correct_option_idx": 1,
+    "difficulty": 0.4,
+    "bloom_level": "understanding",
+    "topic_tag": "arrays",
+    "explanation": "Binary Search continuously divides the search interval in half, leading to a logarithmic O(log N) runtime on sorted arrays.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_arrays_3",
+    "question": "Given an array of size N, you want to find the pair of elements with the maximum sum that are adjacent. What is the optimal time complexity to achieve this?",
+    "options": ["O(1)", "O(N)", "O(N^2)", "O(log N)"],
+    "correct_option_idx": 1,
+    "difficulty": 0.6,
+    "bloom_level": "applying",
+    "topic_tag": "arrays",
+    "explanation": "You can find the maximum adjacent sum in a single linear scan O(N) by checking sums of index pairs (i, i+1).",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_arrays_4",
+    "question": "Which of the following dynamic programming techniques is used to solve the 'Maximum Subarray Sum' problem in O(N) time complexity?",
+    "options": ["Dijkstra's Algorithm", "Kruskal's Algorithm", "Kadane's Algorithm", "Floyd-Warshall Algorithm"],
+    "correct_option_idx": 2,
+    "difficulty": 0.8,
+    "bloom_level": "analyzing",
+    "topic_tag": "arrays",
+    "explanation": "Kadane's Algorithm maintains a running maximum subarray sum ending at each position, achieving O(N) time and O(1) space.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_linked_lists_1",
+    "question": "In a singly linked list, what is the time complexity to insert a new node at the head (beginning) of the list?",
+    "options": ["O(1)", "O(N)", "O(log N)", "O(N^2)"],
+    "correct_option_idx": 0,
+    "difficulty": 0.2,
+    "bloom_level": "remembering",
+    "topic_tag": "linked_lists",
+    "explanation": "Inserting at the head only requires updating the new node's next pointer and redirecting the head pointer, taking constant O(1) time.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_linked_lists_2",
+    "question": "Which pointer manipulation is correct to delete a node 'curr' located after node 'prev' in a singly linked list?",
+    "options": [
+      "curr.next = prev.next",
+      "prev.next = curr.next",
+      "prev.next = curr",
+      "curr = None"
+    ],
+    "correct_option_idx": 1,
+    "difficulty": 0.4,
+    "bloom_level": "understanding",
+    "topic_tag": "linked_lists",
+    "explanation": "To bypass 'curr', the 'next' pointer of 'prev' must be redirected to point to the node immediately following 'curr' (curr.next).",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_linked_lists_3",
+    "question": "Which algorithm or technique is most optimal to detect a cycle (loop) in a singly linked list with O(N) time and O(1) space complexity?",
+    "options": [
+      "Hash table recording visited nodes",
+      "Recursion stack validation",
+      "Floyd's Tortoise and Hare (Two Pointer approach)",
+      "Sorting elements in linked list"
+    ],
+    "correct_option_idx": 2,
+    "difficulty": 0.6,
+    "bloom_level": "applying",
+    "topic_tag": "linked_lists",
+    "explanation": "Floyd's Cycle-Finding algorithm uses a slow pointer (moving 1 step) and a fast pointer (moving 2 steps). If there is a cycle, they will meet in O(N) time and O(1) auxiliary space.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_linked_lists_4",
+    "question": "If you need to reverse a singly linked list in-place, how many pointer variables are required to track references during the iteration?",
+    "options": ["1", "2", "3", "4"],
+    "correct_option_idx": 2,
+    "difficulty": 0.8,
+    "bloom_level": "analyzing",
+    "topic_tag": "linked_lists",
+    "explanation": "Reversing in-place requires 3 pointers: 'prev' (previous node), 'curr' (current node being reversed), and 'nxt' (to preserve the rest of the list before modifying curr.next).",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_stacks_1",
+    "question": "What principle does a stack data structure follow for insertion and deletion of elements?",
+    "options": ["First In First Out (FIFO)", "Last In First Out (LIFO)", "Sorted Ordering", "Random Access"],
+    "correct_option_idx": 1,
+    "difficulty": 0.2,
+    "bloom_level": "remembering",
+    "topic_tag": "stacks",
+    "explanation": "Stacks follow the Last In First Out (LIFO) protocol; the element most recently pushed is the first to be popped.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_stacks_2",
+    "question": "Which of the following expression parsing operations is directly solved using a stack?",
+    "options": [
+      "Evaluating postfix arithmetic expressions",
+      "Finding the shortest path in a grid",
+      "Sorting a list of integers",
+      "Formatting text into paragraphs"
+    ],
+    "correct_option_idx": 0,
+    "difficulty": 0.5,
+    "bloom_level": "understanding",
+    "topic_tag": "stacks",
+    "explanation": "Postfix expression evaluation works by pushing operands onto a stack and popping them when operators are encountered.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_stacks_3",
+    "question": "What is the result of converting the infix expression 'A + B * C' to its equivalent postfix form?",
+    "options": ["A B C * +", "+ A * B C", "A B + C *", "A B C + *"],
+    "correct_option_idx": 0,
+    "difficulty": 0.7,
+    "bloom_level": "applying",
+    "topic_tag": "stacks",
+    "explanation": "By operator precedence, '*' is evaluated first. Postfix format for 'B * C' is 'B C *'. Then, '+' is applied: 'A B C * +'.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_trees_1",
+    "question": "What is the maximum number of child nodes a node can have in a Binary Tree?",
+    "options": ["1", "2", "3", "Infinite"],
+    "correct_option_idx": 1,
+    "difficulty": 0.2,
+    "bloom_level": "remembering",
+    "topic_tag": "trees",
+    "explanation": "By definition, binary tree nodes can have at most 2 child nodes (commonly called left child and right child).",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_trees_2",
+    "question": "Which tree traversal visits nodes in the following order: Left Child, Root Node, Right Child?",
+    "options": ["Pre-order", "In-order", "Post-order", "Level-order"],
+    "correct_option_idx": 1,
+    "difficulty": 0.4,
+    "bloom_level": "understanding",
+    "topic_tag": "trees",
+    "explanation": "In-order traversal visits the left subtree, then evaluates the current root node, and finally traverses the right subtree.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_trees_3",
+    "question": "For a Binary Search Tree (BST), what is the worst-case time complexity of searching for an element if the tree becomes completely unbalanced (skewed)?",
+    "options": ["O(1)", "O(log N)", "O(N)", "O(N log N)"],
+    "correct_option_idx": 2,
+    "difficulty": 0.6,
+    "bloom_level": "applying",
+    "topic_tag": "trees",
+    "explanation": "In a skewed BST (degenerate tree resembling a linked list), searching requires visiting every node, degenerating the lookup time to O(N).",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_graphs_1",
+    "question": "Which data structure is typically utilized internally to implement Breadth-First Search (BFS) in a graph?",
+    "options": ["Stack", "Queue", "Priority Queue", "Hash Map"],
+    "correct_option_idx": 1,
+    "difficulty": 0.3,
+    "bloom_level": "remembering",
+    "topic_tag": "graphs",
+    "explanation": "BFS explores neighbors level-by-level, utilizing a FIFO Queue to track unvisited adjacent vertices in order.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_graphs_2",
+    "question": "What is the main advantage of representing a sparse graph using an Adjacency List rather than an Adjacency Matrix?",
+    "options": [
+      "Faster lookup of whether an edge (U, V) exists",
+      "Less memory space complexity",
+      "Easier multiplication of graph networks",
+      "Simpler execution on GPU architecture"
+    ],
+    "correct_option_idx": 1,
+    "difficulty": 0.5,
+    "bloom_level": "understanding",
+    "topic_tag": "graphs",
+    "explanation": "For a sparse graph (fewer edges than V^2), an adjacency list uses O(V + E) space, whereas an adjacency matrix always consumes O(V^2) space.",
+    "subject": "dsa"
+  },
+  {
+    "question_id": "q_dsa_graphs_3",
+    "question": "Which algorithm finds the single-source shortest path in a graph with non-negative edge weights in O(E + V log V) time using a min-heap?",
+    "options": ["Kruskal's Algorithm", "Bellman-Ford Algorithm", "Dijkstra's Algorithm", "Prim's Algorithm"],
+    "correct_option_idx": 2,
+    "difficulty": 0.8,
+    "bloom_level": "applying",
+    "topic_tag": "graphs",
+    "explanation": "Dijkstra's algorithm uses a priority queue (min-heap) to select the next closest unvisited vertex, making it highly optimal for shortest paths with non-negative weights.",
+    "subject": "dsa"
+  }
+]
